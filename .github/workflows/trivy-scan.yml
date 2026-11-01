@@ -16,24 +16,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Trivy (console output)
+      # Dieses Gate blockiert den Job nur bei kritischen Schwachstellen,
+      # für die bereits eine korrigierte Paketversion verfügbar ist.
+      - name: Run Trivy (block on fixable CRITICAL)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
           scanners: 'vuln'
           format: 'table'
-          severity: 'HIGH,CRITICAL'
-          exit-code: '0'
+          severity: 'CRITICAL'
+          ignore-unfixed: true
+          exit-code: '1'
 
       - name: Run Trivy (SARIF)
         uses: aquasecurity/trivy-action@v0.36.0
+        if: always()
         with:
           scan-type: 'fs'
           scan-ref: '.'
           scanners: 'vuln'
           format: 'sarif'
-          severity: 'HIGH,CRITICAL'
+          severity: 'CRITICAL'
+          ignore-unfixed: true
           exit-code: '0'
           output: 'trivy-results.sarif'
           skip-setup-trivy: true
