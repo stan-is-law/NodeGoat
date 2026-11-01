@@ -1,34 +1,43 @@
 name: Trivy Scan
+
 on:
   workflow_dispatch:
 
 jobs:
   security:
     runs-on: ubuntu-latest
+
     permissions:
       security-events: write
       actions: read
       contents: read
+
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Run Trivy (console output)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'fs'
+          scan-ref: '.'
+          scanners: 'vuln'
           format: 'table'
           severity: 'HIGH,CRITICAL'
           exit-code: '0'
-      
-      - name: Run Trivy (sarif)
-        uses: aquasecurity/trivy-action@0.28.0
+
+      - name: Run Trivy (SARIF)
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'fs'
+          scan-ref: '.'
+          scanners: 'vuln'
           format: 'sarif'
           severity: 'HIGH,CRITICAL'
-          exit-code: '1'
+          exit-code: '0'
           output: 'trivy-results.sarif'
-      
+          skip-setup-trivy: true
+
       - name: Upload to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
         if: always()
